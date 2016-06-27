@@ -15,10 +15,18 @@ struct Problem2 {
     
     
     static func run() {
-        print("*Problem 2*")
+        print("\n*Problem 2*")
         let testCase1 = [7,2,-13,300,6,26]
+        let testCase2 = [Int]()
+        let testCase3 = [7]
+        let testCase4 = [-13]
+        let testCase5 = [-13,300]
         
         printResultsOfIntegerTranslationToEnglishNames(testCase1)
+        printResultsOfIntegerTranslationToEnglishNames(testCase2)
+        printResultsOfIntegerTranslationToEnglishNames(testCase3)
+        printResultsOfIntegerTranslationToEnglishNames(testCase4)
+        printResultsOfIntegerTranslationToEnglishNames(testCase5)
         
     }
 
@@ -26,7 +34,7 @@ struct Problem2 {
         var results = values.map(englishNameOfIntegerUnder100).map(describeResults)
         var output = String()
         for i in 0..<values.count {
-            output = output + "\(values[i]): \(results[i]) "
+            output = output + "\n\(values[i]): \(results[i]) "
         }
         print(output)
     }
@@ -40,14 +48,14 @@ struct Problem2 {
     }
     
     static func englishNameOfIntegerUnder100(integerValue : Int) -> String? {
-        if (integerValue<0 || integerValue>99) {
+        if integerValue<0 || integerValue>99 {
             return nil
-        } else if (integerValue<20) {
+        } else if integerValue<20 {
             return englishNamesOfNumbersUnderTwenty[integerValue]
         } else {
             let tensPlace = integerValue/10
             let onesPlace = integerValue%10
-            if (onesPlace == 0) {
+            if onesPlace == 0 {
                 return englishNamesOfTensPlaces[onesPlace]
             } else {
                 if let tensPlaceName = englishNamesOfTensPlaces[tensPlace], onesPlaceName = englishNamesOfNumbersUnderTwenty[onesPlace] {

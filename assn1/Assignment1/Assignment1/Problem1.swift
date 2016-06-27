@@ -16,12 +16,26 @@ struct Problem1 {
     }
     
     static func run() {
-        print("*Problem 1*")
+        print("\n*Problem 1*")
         
         let testCase1 = [0,5,90,9,15,28,99,37,49,91]
+        let testCase2 = [Int]()
+        let testCase3 = [1]
+        let testCase4 = [2, 90]
+        let testCase5 = [0,5,90,9,15,28,99,37,49,91,99]
+        
+        runTestCase(testCase1)
+        runTestCase(testCase2)
+        runTestCase(testCase3)
+        runTestCase(testCase4)
+        runTestCase(testCase5)
+    }
+    
+    static func runTestCase(testCase : [Int]) {
         do {
-            try printElementsOverFiftyCStyle(testCase1)
-            try printElementsOverFiftyRangeStyle(testCase1)
+            print("\nRunning Problem1 with array \(testCase)")
+            try printElementsOverFiftyCStyle(testCase)
+            try printElementsOverFiftyRangeStyle(testCase)
         } catch RangeError.Over99 {
             print("Error: The input sequence includes a number greater than 99")
         } catch RangeError.NegativeValue {
@@ -47,7 +61,7 @@ struct Problem1 {
                 overFifty.append(input[i])
             }
         }
-        print(overFifty);
+        print("With C-Style loop: \(overFifty)")
     }
 
     static func printElementsOverFiftyRangeStyle(input : [Int])  throws {
@@ -65,8 +79,7 @@ struct Problem1 {
                 overFifty.append(input[i])
             }
         }
-        print(overFifty);
-    }
+        print("With for-in-Style loop: \(overFifty)")    }
 
 }
 

@@ -21,7 +21,7 @@ extension Int {
             return true
         }
         for i in 2...sqrtSelf {
-            if (self%i == 0) {
+            if self%i == 0 {
                 return false
             }
         }
@@ -32,18 +32,31 @@ extension Int {
 struct Problem4 {
     
     static func run() {
-        print ("*Problem 4*")
+        print ("\n*Problem 4*")
         
         let testCase1 = [3,29,3,7,2,7,83]
+        let testCase2 = [Int]()
+        let testCase3 = [1]
+        let testCase4 = [-1,0,1]
+        let testCase5 = [4,6,8,9,10]
+        let testCase6 = [2,3,5,7,11]
         
-        primesOf(testCase1)
         printPrimesOf(testCase1)
+        printPrimesOf(testCase2)
+        printPrimesOf(testCase3)
+        printPrimesOf(testCase4)
+        printPrimesOf(testCase5)
+        printPrimesOf(testCase6)
     }
     
     static func printPrimesOf(items : [Int]) {
-        // FIXME - do we have to do anything special if there are no primes in the array?
+        print("\nRunning Problem4 with \(items)")
         let primes = primesOf(items)
-        print("The following values are positive prime: \(primes)")
+        if primes.isEmpty {
+            print("The input array contains no primes")
+        } else {
+            print("The following values are positive prime: \(primes)")
+        }
     }
     
     static func primesOf(items : [Int]) -> [Int] {

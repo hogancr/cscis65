@@ -12,36 +12,68 @@ struct Problem7 {
     // FIXME - supposed to do six test cases with incremental changes between them, and throw some errors.
     
     static func run() {
-        print("*Problem7*")
+        print("\n*Problem7*")
         
-        // FIXME - is there really no way to have a single catch clause for all the items in RestaurantBill.ItemEntryError???
+        let myBill = RestaurantBill()
+        testAddingItemToBill(myBill,description:"Ham",quantity:1,priceEach:345,shouldFail:false)
+        testAddingItemToBill(myBill,description:"Cheese",quantity:1,priceEach:115,shouldFail:false)
+        // price already known, this time it's ignored
+        testAddingItemToBill(myBill,description:"Ham",quantity:2,priceEach:0,shouldFail:false)
+        
+        // test different service levels
+        testChangingServiceLevel(myBill, serviceLevel: .Poor)
+        testChangingServiceLevel(myBill, serviceLevel: .Fair)
+        testChangingServiceLevel(myBill, serviceLevel: .Good)
+        testChangingServiceLevel(myBill, serviceLevel: .Great)
+        testChangingServiceLevel(myBill, serviceLevel: .Excellent)
+        
+        // add one more time for good measure
+        testAddingItemToBill(myBill,description:"Mustard",quantity:1,priceEach:65,shouldFail:false)
+        
+        // test errors
+        testAddingItemToBill(myBill,description:"Gold",quantity:2,priceEach:120000,shouldFail:true)
+        testAddingItemToBill(myBill,description:"Shoelace",quantity:2,priceEach:-15,shouldFail:true)
+        testAddingItemToBill(myBill,description:"Gum",quantity:-1,priceEach:135,shouldFail:true)
+        testAddingItemToBill(myBill,description:"Dollars",quantity:1000000,priceEach:1000000,shouldFail:true)
+        testAddingItemToBill(myBill,description:"",quantity:1,priceEach:150,shouldFail:true)
+    }
+    
+    static func testAddingItemToBill(bill: RestaurantBill, description: String, quantity: Int, priceEach: Int, shouldFail: Bool) {
+        if shouldFail {
+            print("\nThe following add should fail: \(description) (\(quantity)@\(RestaurantUtils.formatCentsValueForScreen(priceEach)))")
+        } else {
+            print("\nAdding to bill: \(description), (\(quantity)@\(RestaurantUtils.formatCentsValueForScreen(priceEach)))")
+        }
+        
         do {
-            let myBill = RestaurantBill()
-            try myBill.addItem("Ham",quantity:1,priceEach:345)
-            try myBill.addItem("Cheese",quantity:1,priceEach:115)
-            // price already known, this time it's ignored
-            try myBill.addItem("Ham",quantity:2,priceEach:0)
-            printBill(myBill)
-        } catch(RestaurantBill.ItemEntryError.HighPrice) {
-            print("Item entry error! Price must be less than $20")
-        } catch(RestaurantBill.ItemEntryError.NegativePrice) {
-            print("Item entry error! Price must be greater than or equal to $20")
-        } catch RestaurantBill.ItemEntryError.InvalidQuantity(let minQuantity) {
-            print("Item entry error! Quantity must be greater than \(minQuantity)")
-        } catch RestaurantBill.ItemEntryError.InvalidQuantity(let maxQuantity) {
-            print("Item entry error! Quantity must be greater than \(maxQuantity)")
-        } catch(RestaurantBill.ItemEntryError.HighPrice) {
-            print("Item entry error! Price must be less than $20")
+            try bill.addItem(description, quantity: quantity, priceEach: priceEach)
+            printBill(bill)
+        } catch RestaurantBill.ItemEntryError.InvalidQuantity {
+            print(RestaurantBill.ItemEntryError.InvalidQuantity.message)
+        } catch RestaurantBill.ItemEntryError.HighQuantity {
+            print(RestaurantBill.ItemEntryError.HighQuantity.message)
+        } catch RestaurantBill.ItemEntryError.NegativePrice {
+            print(RestaurantBill.ItemEntryError.NegativePrice.message)
+        } catch RestaurantBill.ItemEntryError.HighPrice {
+            print(RestaurantBill.ItemEntryError.HighPrice.message)
+        } catch RestaurantBill.ItemEntryError.NoDescription {
+            print(RestaurantBill.ItemEntryError.NoDescription.message)
         } catch {
             print("Unrecognized error entering item")
         }
     }
     
+    static func testChangingServiceLevel(bill: RestaurantBill, serviceLevel: RestaurantUtils.ServiceLevel) {
+        print("\nSetting service level to \(serviceLevel)=\(RestaurantUtils.formatPercentValueForScreen(serviceLevel.rawValue))")
+        bill.serviceLevel = serviceLevel
+        printBill(bill)
+    }
+    
     static func printBill(bill : RestaurantBill) {
         // FIXME - assume by "percent" the question means "of base bill?"
         print(bill.description)
-        print("Tax \(Int(bill.taxRate*100))%: \(RestaurantUtils.formatCentsValueForScreen(bill.tax))")
-        print("Tip \(Int(bill.serviceLevel.rawValue*100))%: \(RestaurantUtils.formatCentsValueForScreen(bill.tip))")
+        print("Tax \(RestaurantUtils.formatPercentValueForScreen(bill.taxRate)): \(RestaurantUtils.formatCentsValueForScreen(bill.tax))")
+        print("Tip \(RestaurantUtils.formatPercentValueForScreen(bill.serviceLevel.rawValue)): \(RestaurantUtils.formatCentsValueForScreen(bill.tip))")
         print("Final Total: \(RestaurantUtils.formatCentsValueForScreen(bill.finalTotal))")
     }
 }
@@ -50,14 +82,33 @@ class RestaurantBill {
     
     // It would be nice to use the bounds values below to construct these strings, but that doesn't appear to be possible... compiler demands a literal
     enum ItemEntryError: ErrorType {
-        case InvalidQuantity (minQuantity: Int?, maxQuantity:Int?)
+        case InvalidQuantity
         case NegativePrice
         case HighQuantity
         case HighPrice
         case NoDescription
+        
+        var message : String {
+            get {
+                switch self {
+                case ItemEntryError.InvalidQuantity :
+                    return "Item entry error! Quantity must be at least \(ItemEntryErrorBounds.MinQuantity)"
+                case ItemEntryError.HighQuantity :
+                    return "Item entry error! Quantity must be at most \(ItemEntryErrorBounds.MaxQuantity)"
+                case ItemEntryError.NegativePrice:
+                    return "Item entry error! Price must be at least \(RestaurantUtils.formatCentsValueForScreen(ItemEntryErrorBounds.MinPrice))"
+                case ItemEntryError.HighPrice:
+                    return "Item entry error! Price must be at most \(RestaurantUtils.formatCentsValueForScreen(ItemEntryErrorBounds.MaxPrice))"
+                case ItemEntryError.NoDescription:
+                    return "Item entry error! The description cannot be empty."
+                }
+            }
+        }
     }
     
     struct ItemEntryErrorBounds {
+        static let MinPrice=0
+        static let MinQuantity=1
         static let MaxPrice=2000
         static let MaxQuantity=10
     }
@@ -80,7 +131,7 @@ class RestaurantBill {
         serviceLevel = RestaurantUtils.ServiceLevel.Good
     }
     
-    // FIXME - there doesn't appear to be a didset equivalent for Dictionaries, so we will instead do the finalTotal update in the addItem method
+    // FIXME - there doesn't appear to be a didset equivalent for Dictionaries, so we will instead do the finalTotal update in the addItem method. Is this the only way?
     var itemizedBill = [String:ItemDetails]()
     
     var serviceLevel : RestaurantUtils.ServiceLevel {
@@ -96,6 +147,7 @@ class RestaurantBill {
         }
     }
     
+    // we should be using a private set on these, but this only hides it from use outside this file apparently, so
     var tax : Int
     var tip : Int
     var finalTotal : Int
@@ -108,26 +160,22 @@ class RestaurantBill {
     }
     
     func addItem(description: String, quantity: Int, priceEach: Int) throws {
-        // FIXME - check for bad data, e.g. price or quantity out of line, price of item changed, etc
-        if (quantity<=0) {
-            throw ItemEntryError.InvalidQuantity(minQuantity:0, maxQuantity:nil)
-        } else if (priceEach<0) {
+        if quantity<ItemEntryErrorBounds.MinQuantity {
+            throw ItemEntryError.InvalidQuantity
+        } else if priceEach<ItemEntryErrorBounds.MinPrice {
             throw ItemEntryError.NegativePrice
-        } else if (quantity > ItemEntryErrorBounds.MaxQuantity) {
-            throw ItemEntryError.InvalidQuantity(minQuantity:nil, maxQuantity:ItemEntryErrorBounds.MaxQuantity)
-
-        } else if (priceEach>ItemEntryErrorBounds.MaxPrice) {
+        } else if quantity > ItemEntryErrorBounds.MaxQuantity {
+            throw ItemEntryError.HighQuantity
+        } else if priceEach>ItemEntryErrorBounds.MaxPrice {
             throw ItemEntryError.HighPrice
-        } else if (description.isEmpty) {
+        } else if description.isEmpty {
             throw ItemEntryError.NoDescription
         }
         
         
         if let itemEntry = itemizedBill[description] {
             // entry already exists, just increment quantity by the new amount
-            //print("addItem \(quantity) of \(description), already has \(itemEntry.quantity)")
             itemizedBill[description] = ItemDetails(quantity: itemEntry.quantity + quantity, price: itemEntry.price)
-            //print("addedItem \(itemEntry.quantity)")
         } else {
             // no entry exists, add a new one
             itemizedBill[description] = ItemDetails(quantity:quantity, price:priceEach)

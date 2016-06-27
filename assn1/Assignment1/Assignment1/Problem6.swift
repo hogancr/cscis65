@@ -30,17 +30,33 @@ struct Problem6 {
     }
     
     static func run() {
-        print("*Problem 6*")
+        print("\n*Problem 6*")
         
         let testCase1 = ["Ham":345, "Cheese":115]
+        let testCase2 = [String:Int]()
+        let testCase3 = ["Ham":420]
+        let testCase4 = ["Water":0]
+        let testCase5 = ["Shoelace":-15]
         
-        // FIXME - don't understand the self check...leaving off ServiceLevel here gives me an error that Good is an unresolved identifier
-        printBillForItems(testCase1, serviceLevel:RestaurantUtils.ServiceLevel.Good)
+        printBillForItems(testCase1, serviceLevel:.Poor)
+        printBillForItems(testCase1, serviceLevel:.Good)
+        printBillForItems(testCase1, serviceLevel:.Excellent)
+        printBillForItems(testCase2, serviceLevel:.Good)
+        printBillForItems(testCase3, serviceLevel:.Fair)
+        printBillForItems(testCase3, serviceLevel:.Great)
+        printBillForItems(testCase4, serviceLevel:.Good)
+        printBillForItems(testCase5, serviceLevel:.Good)
+
     }
     
     static func printBillForItems(items : [String:Int], serviceLevel : RestaurantUtils.ServiceLevel) {
         let bill = billForItems(items, serviceLevel: serviceLevel)
-        print("Your bill summary: \(bill.description)")
+        if bill.total<0 {
+            // Assumes that individual items can have negative prices as long as the bill itself doesn't turn negative. Behavior under negative values is not specified in the problem so this should do. Could also have it throw an exception in the calculate method.
+            print("\nError, bill cannot be negative!")
+        } else {
+            print("\nYour bill summary: \(bill.description)")
+        }
     }
     
     static func billForItems(items : [String:Int], serviceLevel : RestaurantUtils.ServiceLevel) -> Bill {

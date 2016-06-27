@@ -21,11 +21,15 @@ struct RestaurantUtils {
     
     
     static func formatCentsValueForScreen(cents : Int) -> String {
-        let dollarPart = cents / 100
-        let centsPart = cents % 100
         // FIXME - do we have to worry about commas in dollar amounts?
         // FIXME - do we have to do anything weird for small sums, like use the cent symbol rather than $0.XX?
-        return "$\(dollarPart).\(centsPart)";
+        let dollars = Double(cents)/100.0
+        return String(format: "$%.2f", dollars)
+    }
+    
+    static func formatPercentValueForScreen(zeroToOne : Double) -> String {
+        let percent = zeroToOne*100.0
+        return String(format: "%.0f%%", percent)
     }
 
     
